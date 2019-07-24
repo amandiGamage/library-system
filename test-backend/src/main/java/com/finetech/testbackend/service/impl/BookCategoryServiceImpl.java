@@ -41,7 +41,16 @@ public class BookCategoryServiceImpl implements BookCategoryService {
 
     @Override
     public BookCategoryDTO updateBookCategory(BookCategoryDTO bookCategoryDTO) throws Exception{
-        return null;
+        BookCategory bookCategory = new BookCategory();
+        BeanUtils.copyProperties(bookCategoryDTO,bookCategory);
+        BookCategory updatedBookCategory = bookCategoryDao.save(bookCategory);
+
+        if (null != updatedBookCategory ){
+            bookCategoryDTO.setId(updatedBookCategory.getId());
+            return bookCategoryDTO;
+        }else {
+            return null;
+        }
     }
 
     @Override

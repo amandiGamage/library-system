@@ -25,4 +25,6 @@ public class ResponseMassage {
     public static final String BOOK_CATEGORY_NOT_FOUND = "Body was not found";
     public static final String BOOK_CATEGORY_DELETED = "Book Category was successfully deleted";
     public static final String BOOK_CATEGORY_NOT_DELETED = "Book Category not deleted";
+    public static final String BOOK_CATEGORY_UPDATED = "Book Category updated";
+    public static final String BOOK_CATEGORY_NOT_UPDATED = "Book Category Not updated";
 }

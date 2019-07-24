@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 public class BookCategoryController {
@@ -35,7 +36,9 @@ public class BookCategoryController {
         objectMapper = new ObjectMapper();
     }
 
-    @PostMapping(value = "/books/categories")
+    //Use for creating resources.
+    @CrossOrigin(origins = "http://localhost:4200")//Cross origin allow
+    @PostMapping(value = "/books/categories", consumes = "application/json")
     public ResponseEntity<JsonNode> addBookCategory(@RequestBody String payload) {
         try {
             JsonNode jsonNode = objectMapper.readTree(payload);
@@ -62,10 +65,12 @@ public class BookCategoryController {
         }
     }
 
+    //Use for creating resources.
+    @CrossOrigin(origins = "http://localhost:4200")//Cross origin allow
     @DeleteMapping(value = "/books/categories/{id}")
-    public ResponseEntity<JsonNode> deleteBookCategory(){
+    public ResponseEntity<JsonNode> deleteBookCategory(@PathVariable("id")Integer id){
         try {
-            boolean result = bookCategoryService.deleteBookCategory(2);
+            boolean result = bookCategoryService.deleteBookCategory(id);
 
             if (result){
                 return ResponseEntity
@@ -87,6 +92,8 @@ public class BookCategoryController {
         }
     }
 
+    //Use for creating resources.
+    @CrossOrigin(origins = "http://localhost:4200")//Cross origin allow
     @GetMapping(value = "/categories/{id}/books")
     public ResponseEntity<JsonNode> findByCategory(@PathVariable("id")Integer id){
         try {
@@ -112,4 +119,65 @@ public class BookCategoryController {
         }
 
     }
-}
+
+    //Use for creating resources.
+    @CrossOrigin(origins = "http://localhost:4200")//Cross origin allow
+    @GetMapping(value = "/categories/{id}")
+    public ResponseEntity<JsonNode> getCategory(@PathVariable("id")Integer id){
+        try {
+            BookCategoryDTO searchedCategory = bookCategoryService.findByID(id);
+
+            if (null!= searchedCategory){
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(JsonService.toJsonNode(
+                                new ResponseWrapper<>(ResponseMassage.BOOK_CATEGORY_AVAILABLE,searchedCategory)));
+            }else {
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body(JsonService.toJsonNode(
+                                new ResponseWrapper<>(ResponseMassage.BOOK_CATEGORY_NOT_FOUND,null)));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(JsonService.toJsonNode(
+                            new ResponseWrapper<>(e.getMessage(),null)));
+        }
+    }
+
+    //Use for creating resources.
+    @CrossOrigin(origins = "http://localhost:4200")//Cross origin allow
+    @PutMapping(value = "/categories/{id}")
+    public ResponseEntity<JsonNode> updatCategory(@PathVariable("id")Integer id,@RequestBody String payload){
+        try {
+            BookCategoryDTO bookCategoryDTO = bookCategoryService.findByID(id);
+
+            if (null!= bookCategoryDTO){
+                JsonNode jsonNode = objectMapper.readTree(payload);
+                BookCategoryDTO convertedValue = objectMapper.convertValue(jsonNode, BookCategoryDTO.class);
+                convertedValue.setId(id);
+                BookCategoryDTO updatedBookCategoryDto = bookCategoryService.updateBookCategory(convertedValue);
+
+                return ResponseEntity.status(HttpStatus.OK).body(JsonService.toJsonNode(
+                        new ResponseWrapper<>(ResponseMassage.BOOK_CATEGORY_UPDATED,updatedBookCategoryDto)
+                ));
+            }else {
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body(JsonService.toJsonNode(
+                                new ResponseWrapper<>(ResponseMassage.BOOK_CATEGORY_NOT_UPDATED,null)
+                        ));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(JsonService.toJsonNode(
+                            new ResponseWrapper<>(e.getMessage(),null)));
+        }
+    }
+
+    }
